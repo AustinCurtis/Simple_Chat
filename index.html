@@ -1,0 +1,100 @@
+<html>
+	<head>
+		<link rel="shortcut icon" href="">
+		<title>Austin's Chat</title>
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript">
+		
+			var CSS_COLOR_NAMES = ["AliceBlue","AntiqueWhite","Aqua","Aquamarine","Azure","Beige","Bisque","Black","BlanchedAlmond","Blue","BlueViolet","Brown","BurlyWood","CadetBlue","Chartreuse","Chocolate","Coral","CornflowerBlue","Cornsilk","Crimson","Cyan","DarkBlue","DarkCyan","DarkGoldenRod","DarkGray","DarkGrey","DarkGreen","DarkKhaki","DarkMagenta","DarkOliveGreen","Darkorange","DarkOrchid","DarkRed","DarkSalmon","DarkSeaGreen","DarkSlateBlue","DarkSlateGray","DarkSlateGrey","DarkTurquoise","DarkViolet","DeepPink","DeepSkyBlue","DimGray","DimGrey","DodgerBlue","FireBrick","FloralWhite","ForestGreen","Fuchsia","Gainsboro","GhostWhite","Gold","GoldenRod","Gray","Grey","Green","GreenYellow","HoneyDew","HotPink","IndianRed","Indigo","Ivory","Khaki","Lavender","LavenderBlush","LawnGreen","LemonChiffon","LightBlue","LightCoral","LightCyan","LightGoldenRodYellow","LightGray","LightGrey","LightGreen","LightPink","LightSalmon","LightSeaGreen","LightSkyBlue","LightSlateGray","LightSlateGrey","LightSteelBlue","LightYellow","Lime","LimeGreen","Linen","Magenta","Maroon","MediumAquaMarine","MediumBlue","MediumOrchid","MediumPurple","MediumSeaGreen","MediumSlateBlue","MediumSpringGreen","MediumTurquoise","MediumVioletRed","MidnightBlue","MintCream","MistyRose","Moccasin","NavajoWhite","Navy","OldLace","Olive","OliveDrab","Orange","OrangeRed","Orchid","PaleGoldenRod","PaleGreen","PaleTurquoise","PaleVioletRed","PapayaWhip","PeachPuff","Peru","Pink","Plum","PowderBlue","Purple","Red","RosyBrown","RoyalBlue","SaddleBrown","Salmon","SandyBrown","SeaGreen","SeaShell","Sienna","Silver","SkyBlue","SlateBlue","SlateGray","SlateGrey","Snow","SpringGreen","SteelBlue","Tan","Teal","Thistle","Tomato","Turquoise","Violet","Wheat","White","WhiteSmoke","Yellow","YellowGreen"];
+
+			var updateScroll = function() {
+				var ul = document.getElementById('messages');
+				ul.scrollTop = ul.scrollHeight;
+			};
+
+			var socket = io.connect();
+			
+			socket.on('connect', function() {
+				console.log("Connected");
+			});
+
+			// Receive from any event
+			var users = [];
+			socket.on('chatmessage', function (data) {
+				console.log(data);
+				//var users = [];
+				var real = false;
+				for (var i = 0; i < users.length; i++) {
+        			if(data[1] == users[i]){
+        				real=true;
+        				break;
+        			};
+    			};
+    			if (real != true) {
+    				users.push(data[1]);
+    				// var color = CSS_COLOR_NAMES[Math.floor((Math.random() * 147) + 1)];
+    				var color = data[2];
+    				var style = document.createElement('style');
+					style.type = 'text/css';
+					style.innerHTML = "." + data[1] + " { background: "+ color +"; }";
+					document.getElementsByTagName('head')[0].appendChild(style);
+					console.log("We have "+ users.length + " Users");
+    			};
+				//console.log(socket.id);
+				// document.getElementById('messages').innerHTML = "" + data + "" + document.getElementById('messages').innerHTML;
+				var ul = document.getElementById('messages');
+				var li = document.createElement('li');
+				li.appendChild(document.createTextNode(data[3] + ": " + data[0]));
+				li.className += data[1];
+				ul.appendChild(li);
+				updateScroll();
+				console.log("From: " + data[1]);
+
+			});
+			
+			var sendmessage = function(message) {
+				console.log("chatmessage: " + message[0]);
+				socket.emit('chatmessage', message);
+				document.getElementById('message').value="";
+				document.getElementById("uname").style.display = "none";
+				document.getElementById("dd").style.display = "none";
+			};
+			
+
+			
+
+	
+		</script>
+		<link rel="stylesheet" type="text/css" href="main.css">	
+	</head>
+ <body>
+<!--  <div id="messages">
+ No Messages Yet
+ </div> -->
+ <div id="h">
+ 	<h2>Austin's Chat App</h2>
+ </div>
+ <ul id="messages">
+ 	<li>No Messages Yet</li>
+ </ul>
+ <div id="entry">
+ 	<input type="text" id="message" name="message" placeholder="Your Message">
+ 	<br>
+ 	<input type="text" id="uname" name="uname" placeholder="Username">
+ 	<select id="dd">
+ 		<option value="White">White</option>
+ 		<option value="Aqua">Aqua</option>
+ 		<option value="LightGreen">Green</option>
+ 		<option value="Gray">Gray</option>
+ 		<option value="Gold">Gold</option>
+ 		<option value="Orange">Orange</option>
+ 		<option value="Red">Red</option>
+ 		<option value="Purple">Purple</option>
+ 		<option value="Yellow">Yellow</option>
+ 		<option value="Pink">Pink</option>
+ 	</select><br>
+ 	<button id="go" onclick="sendmessage([document.getElementById('message').value, socket.id, document.getElementById('dd').options[document.getElementById('dd').selectedIndex].text, document.getElementById('uname').value]);">Send</button>
+<!--  <input type="submit" value="submit" onclick="sendmessage([document.getElementById('message').value, socket.id]);"> -->
+ </div>
+ </body>
+</html>
